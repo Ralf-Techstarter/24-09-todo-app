@@ -36,6 +36,7 @@ function App() {
     fetch(`http://localhost:3050/delete/${id_nummer}`, {
       method: "DELETE",
     })
+    .then(() => setTasks(tasks.filter((task) => task.id !== id_nummer)))
 
   }
 
