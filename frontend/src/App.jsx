@@ -23,22 +23,50 @@ function App() {
       method: "POST",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify({title}),
-    })      
+    })       
     // hier möchte ich, dass die Liste in der App auch aktualisiert wird
-      .then((res) => res.json())
-      .then((neueAufgabe) => setTasks([...tasks, neueAufgabe]))
-
+    .then((res) => res.json())
+    .then((neueAufgabe) => {
+      console.log("Server-Antwort:", neueAufgabe);
+      if (Array.isArray(neueAufgabe) && neueAufgabe.length > 0) {
+        setTasks((prevTasks) => [...prevTasks, neueAufgabe[0]]);
+      }
+    })
+  
     setTitle("");
-  }
+  };
   
   const itemLoeschen = (id_nummer) => {
-    //console.log("Gedrückte Taste:" + id_nummer);
     fetch(`http://localhost:3050/delete/${id_nummer}`, {
       method: "DELETE",
     })
-    .then(() => setTasks(tasks.filter((task) => task.id !== id_nummer)))
+    .then((res) => res.json())
+    .then((response) => {
+      if (response.message) {
+        setTasks(tasks.filter((task) => task.id !== id_nummer));
+      }
+    });
+  };
 
-  }
+  const itemAktualisieren = (id_nummer, completed) => {
+    fetch(`http://localhost:3050/update/${id_nummer}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ completed }),
+    })
+    .then((res) => res.json())
+    .then((response) => {
+      if (response.message) {
+        setTasks((prevTasks) =>
+          prevTasks.map((task) =>
+            task.id === id_nummer ? { ...task, completed } : task
+          )
+        );
+      }
+    });
+  };
+  
+  
 
 
   return (
@@ -49,17 +77,21 @@ function App() {
 
       <ul>
         {// hier gehört der Code, um die To-Do Liste dynamisch zu gestalten
-        tasks.map(({id, title, completed}) => (
+        tasks.map(({ id, title, completed }) => (
           <li key={id}>
-            <input type='checkbox' />
+            <input
+              type='checkbox'
+              checked={completed}
+              onChange={(e) => itemAktualisieren(id, e.target.checked)}
+            />
             {title}
             <button onClick={() => itemLoeschen(id)}>X</button>
           </li>
-        ))
-        }
+        ))}
       </ul>
     </>
   )
 }
 
 export default App
+ 

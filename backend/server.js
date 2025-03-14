@@ -30,19 +30,54 @@ app.get('/liste_abrufen', async (req, res) => {
 });
 
 // Wenn ein neues Item hinzugefügt werden soll, soll NodeJS Server diesen Request so behandeln:
+// app.post('/add', async (req, res) => {
+//     console.log("POST kommt an")
+//     const result = await pool.query('INSERT INTO tasks (title) VALUES ($1)', [req.body.title])
+//     res.json(result.rows)
+
+
+//     db.run('INSERT INTO tasks (title) VALUES (?)', [req.body.title], function () {
+//         res.json({id: this.lastID, title: req.body.title, completed: 0});
+//     });
+
+// });
+
+
 app.post('/add', async (req, res) => {
-    console.log("POST kommt an")
-    const result = await pool.query('INSERT INTO tasks (title) VALUES ($1)', [req.body.title])
-    console.log(result.rows) // !hier ist noch etwas falsch
-    res.json(result.rows)
+    console.log("POST kommt an");
+    try {
+      const result = await pool.query('INSERT INTO tasks (title) VALUES ($1) RETURNING *', [req.body.title]);
+      res.json(result.rows);
+    } catch (error) {
+      console.error("Fehler beim Einfügen der Aufgabe:", error);
+      res.status(500).json({ error: "Fehler beim Einfügen der Aufgabe" });
+    }
+  });
 
 
-    // db.run('INSERT INTO tasks (title) VALUES (?)', [req.body.title], function () {
-    //     res.json({id: this.lastID, title: req.body.title, completed: 0});
-    // });
+  app.delete('/delete/:id', async (req, res) => {
+    const result = await pool.query('DELETE FROM tasks WHERE id = $1 RETURNING *', [req.params.id]);
+    if (result.rowCount > 0) {
+      res.json({ message: "Aufgabe gelöscht", task: result.rows[0] });
+    } else {
+      res.status(404).json({ error: "Aufgabe nicht gefunden" });
+    }
+  });
 
-});
 
+  app.put('/update/:id', async (req, res) => {
+    const { completed } = req.body;
+    const result = await pool.query('UPDATE tasks SET completed = $1 WHERE id = $2 RETURNING *', [completed, req.params.id]);
+    if (result.rowCount > 0) {
+      res.json({ message: "Aufgabe aktualisiert", task: result.rows[0] });
+    } else {
+      res.status(404).json({ error: "Aufgabe nicht gefunden" });
+    }
+  });
+  
+  
+  
+  
 
 
 // app.delete('/delete/:id', (req, res) => {
