@@ -29,19 +29,6 @@ app.get('/liste_abrufen', async (req, res) => {
     res.json(result.rows)
 });
 
-// Wenn ein neues Item hinzugefügt werden soll, soll NodeJS Server diesen Request so behandeln:
-// app.post('/add', async (req, res) => {
-//     console.log("POST kommt an")
-//     const result = await pool.query('INSERT INTO tasks (title) VALUES ($1)', [req.body.title])
-//     res.json(result.rows)
-
-
-//     db.run('INSERT INTO tasks (title) VALUES (?)', [req.body.title], function () {
-//         res.json({id: this.lastID, title: req.body.title, completed: 0});
-//     });
-
-// });
-
 
 app.post('/add', async (req, res) => {
     console.log("POST kommt an");
@@ -74,15 +61,6 @@ app.post('/add', async (req, res) => {
       res.status(404).json({ error: "Aufgabe nicht gefunden" });
     }
   });
-  
-  
-  
-  
-
-
-// app.delete('/delete/:id', (req, res) => {
-//     db.run('DELETE FROM tasks WHERE id = ?', req.params.id, () =>{res.json({message: "Eingabe gelöscht"})});
-// })
 
 
 app.listen(3050, "localhost", () => {
